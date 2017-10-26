@@ -48,7 +48,7 @@ public class WebcamCapturePlugin implements CaptureProvider {
         boolean accepted = dialog.showDialog();
 
         if (accepted) {
-            WebcamCaptureConfiguration configuration = new WebcamCaptureConfiguration(dialog.getConfigurationName(),dialog.id_camera,dialog.fps_option);
+            WebcamCaptureConfiguration configuration = new WebcamCaptureConfiguration(dialog.getConfigurationName(),dialog.id_camera,dialog.fps_option,dialog.dim_option);
 
             configurations.add(configuration);
             return configuration;

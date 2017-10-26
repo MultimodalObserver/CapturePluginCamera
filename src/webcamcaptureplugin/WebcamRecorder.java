@@ -11,6 +11,7 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -52,14 +53,33 @@ public class WebcamRecorder {
     public int id_camera;
     public int fps_op;
     public int sw=1;
+    public int IMG_WIDTH;
+    public int IMG_HEIGHT;
     
-    public WebcamRecorder(File stageFolder, ProjectOrganization org, Participant p,int ID,int FPS,WebcamCaptureConfiguration c){
+    public WebcamRecorder(File stageFolder, ProjectOrganization org, Participant p,int ID,int FPS,int DIM,WebcamCaptureConfiguration c){
         participant = p;
         this.org = org;
         this.config = c;
         this.id_camera=ID;
         this.fps_op=FPS;
         createFile(stageFolder);
+        switch(DIM){
+            case 0:                
+                IMG_WIDTH = 640;
+                IMG_HEIGHT = 480;
+            case 1:
+                IMG_WIDTH = 800;
+                IMG_HEIGHT = 600;
+            case 2:
+                IMG_WIDTH = 1024;
+                IMG_HEIGHT = 768;
+            case 3:
+                IMG_WIDTH = 1280;
+                IMG_HEIGHT = 720;
+            case 4:
+                IMG_WIDTH = 1366;
+                IMG_HEIGHT = 768;
+        }
     }
 
     private void createFile(File parent) {
@@ -103,18 +123,22 @@ public class WebcamRecorder {
 		IMediaWriter writer = ToolFactory.makeWriter(path+"\\"+file_name+".mp4");
 		Dimension size = WebcamResolution.VGA.getSize();
 
-		writer.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, size.width, size.height);
+		writer.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, IMG_WIDTH, IMG_HEIGHT);
 
 		Webcam webcam = wCam.get(id_camera);
                 discovery.stop();
 		webcam.setViewSize(size);
 		webcam.open(true);
+                System.out.println(size.width+","+size.height);
                 start = System.currentTimeMillis();
                 inicio = System.currentTimeMillis();                
                 int i= 0;
 		while(sw!=0) {
-
+                        
 			BufferedImage image = ConverterFactory.convertToType(webcam.getImage(), BufferedImage.TYPE_3BYTE_BGR);
+                        int type = image.getType() == 0? BufferedImage.TYPE_INT_ARGB : image.getType();
+                        image = resizeImage(image,type);
+                        image = ConverterFactory.convertToType(image, BufferedImage.TYPE_3BYTE_BGR);
 			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 			IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - start) * 1000);
@@ -177,6 +201,14 @@ public class WebcamRecorder {
                 }
             }
 	}
+        
+        private BufferedImage resizeImage(BufferedImage originalImage, int type){
+            BufferedImage resizedImage = new BufferedImage(IMG_WIDTH,IMG_HEIGHT,type);
+            Graphics2D g = resizedImage.createGraphics();
+            g.drawImage(originalImage,0,0,IMG_WIDTH,IMG_HEIGHT,null);
+            g.dispose();
+            return resizedImage;
+        }
         
         public void StartRecord(){            
                 Thread t=new Thread(new Record());

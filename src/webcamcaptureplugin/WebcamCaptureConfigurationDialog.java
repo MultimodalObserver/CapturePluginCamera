@@ -22,8 +22,10 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
     JButton accept;
     JComboBox cbCamera;
     JComboBox cbFPS;
+    JComboBox cbDIM;
     public int id_camera;
     public int fps_option;
+    public int dim_option;
     ProjectOrganization org;    
     private static WebcamDiscoveryService discovery = Webcam.getDiscoveryService(); 
 
@@ -58,6 +60,8 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         JLabel webcam = new JLabel("Select your device:");
         JLabel fps = new JLabel("FPS:");
         String[] frames = {"15","30","45","60"};
+        JLabel dim = new JLabel("Dimension:");
+        String[] dimensiones = {"640x480","800x600","1024x768","1280x720","1366x768"};
         String[ ] cameras = new String[wCam.size()];
         for(int i=0;i<wCam.size();i++){
             cameras[i]=wCam.get(i).getName();
@@ -66,6 +70,8 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         discovery.stop();
         cbCamera = new JComboBox(cameras);
         cbFPS = new JComboBox(frames);
+        cbDIM = new JComboBox(dimensiones);
+        cbFPS.setSelectedIndex(3);
         nameField = new JTextField();
         nameField.getDocument().addDocumentListener(this);
 
@@ -76,11 +82,13 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         add(cbCamera,gbc.gx(2).gy(2).wx(1).gw(3));
         add(fps,gbc.gx(0).gy(4));
         add(cbFPS,gbc.gx(2).gy(4).wx(1).gw(3));
+        add(dim,gbc.gx(0).gy(6));
+        add(cbDIM,gbc.gx(2).gy(6).wx(1).gw(3));
               
 
         errorLabel = new JLabel("");
         errorLabel.setForeground(Color.red);
-        add(errorLabel, gbc.gx(0).gy(5).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
+        add(errorLabel, gbc.gx(0).gy(7).gw(5).a(GridBConstraints.LAST_LINE_START).wy(1));
 
         accept = new JButton("Accept");
         
@@ -90,6 +98,7 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
                 accepted = true;
                 id_camera=cbCamera.getSelectedIndex();
                 fps_option=cbFPS.getSelectedIndex(); //0==15; 1 == 30; 2== 45; 3==60
+                dim_option=cbDIM.getSelectedIndex(); 
                 setVisible(false);
                 dispose();
             }
