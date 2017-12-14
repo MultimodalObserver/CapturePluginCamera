@@ -38,6 +38,7 @@ public class WebcamRecorder {
     private WebcamCaptureConfiguration config;
     private File output;
     private File arInicio;
+    private File frames;
     private String path;
     private String file_name;
     private FileOutputStream outputStream;    
@@ -55,6 +56,7 @@ public class WebcamRecorder {
     public int sw=1;
     public int IMG_WIDTH;
     public int IMG_HEIGHT;
+    public long time;
     
     public WebcamRecorder(File stageFolder, ProjectOrganization org, Participant p,int ID,int FPS,int DIM,WebcamCaptureConfiguration c){
         participant = p;
@@ -91,6 +93,7 @@ public class WebcamRecorder {
 
         output = new File(parent, reportDate + "_" + config.getId() + ".mp4");
         arInicio = new File(parent, reportDate + "_" + config.getId() + "-temp.txt");
+        frames = new File(parent, reportDate + "_" + config.getId() + "-frames.txt");
         path = parent.getAbsolutePath();
         file_name = reportDate + "_"+config.getId();
         try {
@@ -128,25 +131,29 @@ public class WebcamRecorder {
 		Webcam webcam = wCam.get(id_camera);
                 discovery.stop();
 		webcam.setViewSize(size);
-		webcam.open(true);
-                System.out.println(size.width+","+size.height);
-                start = System.currentTimeMillis();
-                inicio = System.currentTimeMillis();                
+		webcam.open(true); 
                 int i= 0;
+                start = System.currentTimeMillis();
+                inicio = System.currentTimeMillis();
+                BufferedWriter bw2;
+                try {
+                    bw2 = new BufferedWriter(new FileWriter(frames));
+               
 		while(sw!=0) {
                         
 			BufferedImage image = ConverterFactory.convertToType(webcam.getImage(), BufferedImage.TYPE_3BYTE_BGR);
                         int type = image.getType() == 0? BufferedImage.TYPE_INT_ARGB : image.getType();
-                        image = resizeImage(image,type);
+                        if(size.width!=IMG_WIDTH && size.height !=IMG_HEIGHT){ image = resizeImage(image,type);}
                         image = ConverterFactory.convertToType(image, BufferedImage.TYPE_3BYTE_BGR);
 			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
-
-			IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - start) * 1000);
+                        time = System.currentTimeMillis();
+			IVideoPicture frame = converter.toPicture(image, (time-start) * 1000);
 			frame.setKeyFrame(i == 0);
 			frame.setQuality(0);
-
+                        bw2.write(time+"\n");
 			writer.encodeVideo(0, frame);
                         i++;
+                        
                         switch(fps_op){
                                 case 0:
                             {
@@ -181,8 +188,12 @@ public class WebcamRecorder {
                                 Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-		}
-                fin = System.currentTimeMillis();
+		} 
+                bw2.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                fin = time;
 		writer.close();
                 webcam.close();
                 BufferedWriter bw;
