@@ -59,9 +59,9 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         JLabel label = new JLabel("Configuration name: ");
         JLabel webcam = new JLabel("Select your device:");
         JLabel fps = new JLabel("FPS:");
-        String[] frames = {"15","30","45","60"};
+        String[] frames = {"5","15","30","45","60"};
         JLabel dim = new JLabel("Dimension:");
-        String[] dimensiones = {"640x480","800x600","1024x768","1280x720","1366x768"};
+        String[] dimensiones = {"176x144","320x240","640x480","800x600","1024x768","1280x720","1366x768","1920x1080"};
         String[ ] cameras = new String[wCam.size()];
         for(int i=0;i<wCam.size();i++){
             cameras[i]=wCam.get(i).getName();
@@ -71,7 +71,7 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         cbCamera = new JComboBox(cameras);
         cbFPS = new JComboBox(frames);
         cbDIM = new JComboBox(dimensiones);
-        cbFPS.setSelectedIndex(3);
+        cbFPS.setSelectedIndex(4);
         nameField = new JTextField();
         nameField.getDocument().addDocumentListener(this);
 

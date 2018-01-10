@@ -67,20 +67,37 @@ public class WebcamRecorder {
         createFile(stageFolder);
         switch(DIM){
             case 0:                
+                IMG_WIDTH = 176;
+                IMG_HEIGHT = 144;
+                break;
+            case 1:
+                IMG_WIDTH = 320;
+                IMG_HEIGHT = 240;
+                break;
+            case 2:                
                 IMG_WIDTH = 640;
                 IMG_HEIGHT = 480;
-            case 1:
+                break;
+            case 3:
                 IMG_WIDTH = 800;
                 IMG_HEIGHT = 600;
-            case 2:
+                break;
+            case 4:
                 IMG_WIDTH = 1024;
                 IMG_HEIGHT = 768;
-            case 3:
+                break;
+            case 5:
                 IMG_WIDTH = 1280;
                 IMG_HEIGHT = 720;
-            case 4:
+                break;
+            case 6:
                 IMG_WIDTH = 1366;
                 IMG_HEIGHT = 768;
+                break;
+            case 7:
+                IMG_WIDTH = 1920;
+                IMG_HEIGHT = 1080;
+                break;
         }
     }
 
@@ -124,11 +141,26 @@ public class WebcamRecorder {
 
                 List<Webcam> wCam = Webcam.getWebcams();
 		IMediaWriter writer = ToolFactory.makeWriter(path+"\\"+file_name+".mp4");
-		Dimension size = WebcamResolution.VGA.getSize();
-
+                Dimension size = new Dimension(IMG_WIDTH,IMG_HEIGHT);
+                /*if(IMG_WIDTH>640){                    
+                    size = WebcamResolution.VGA.getSize();
+                }
+                else{                    
+                    size = new Dimension(IMG_WIDTH,IMG_HEIGHT);
+                }*/
+                Dimension[] nonStandardResolutions = new Dimension[] {
+			new Dimension(1024,768),
+			new Dimension(800,600),
+                        new Dimension(1280,720),
+                        new Dimension(176,144),
+                        new Dimension(320,240),
+                        new Dimension(640,480),
+                        new Dimension(1366,768),
+                        new Dimension(1920,1080),
+		};
 		writer.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, IMG_WIDTH, IMG_HEIGHT);
-
 		Webcam webcam = wCam.get(id_camera);
+		webcam.setCustomViewSizes(nonStandardResolutions);
                 discovery.stop();
 		webcam.setViewSize(size);
 		webcam.open(true); 
@@ -143,7 +175,7 @@ public class WebcamRecorder {
                         
 			BufferedImage image = ConverterFactory.convertToType(webcam.getImage(), BufferedImage.TYPE_3BYTE_BGR);
                         int type = image.getType() == 0? BufferedImage.TYPE_INT_ARGB : image.getType();
-                        if(size.width!=IMG_WIDTH && size.height !=IMG_HEIGHT){ image = resizeImage(image,type);}
+                        //if(size.width!=IMG_WIDTH && size.height !=IMG_HEIGHT){ image = resizeImage(image,type);}
                         image = ConverterFactory.convertToType(image, BufferedImage.TYPE_3BYTE_BGR);
 			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
                         time = System.currentTimeMillis();
@@ -158,7 +190,7 @@ public class WebcamRecorder {
                                 case 0:
                             {
                                 try {
-                                    Thread.sleep(25);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -166,7 +198,7 @@ public class WebcamRecorder {
                                 case 1:
                             {
                                 try {
-                                    Thread.sleep(10);
+                                    Thread.sleep(25);
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -174,12 +206,20 @@ public class WebcamRecorder {
                                 case 2:
                             {
                                 try {
+                                    Thread.sleep(10);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                                case 3:
+                            {
+                                try {
                                     Thread.sleep(4);
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
-                                case 3: 
+                                case 4: 
                             }
                         while(sw==2){                           
                             try {       
