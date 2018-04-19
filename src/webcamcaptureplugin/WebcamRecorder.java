@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,10 +44,10 @@ public class WebcamRecorder {
     private String file_name;
     private FileOutputStream outputStream;    
     private FileDescription desc;    
-    static long start;
-    static long pause;
-    private static long inicio;
-    private static long fin;
+    private long start;
+    private long pause;
+    private long inicio=0;
+    private long fin=0;
     private static WebcamDiscoveryService discovery = Webcam.getDiscoveryService(); 
     
     private static final Logger logger = Logger.getLogger(WebcamRecorder.class.getName());
@@ -110,7 +111,7 @@ public class WebcamRecorder {
 
         output = new File(parent, reportDate + "_" + config.getId() + ".mp4");
         arInicio = new File(parent, reportDate + "_" + config.getId() + "-temp.txt");
-        frames = new File(parent, reportDate + "_" + config.getId() + "-frames.txt");
+        //frames = new File(parent, reportDate + "_" + config.getId() + "-frames.txt");
         path = parent.getAbsolutePath();
         file_name = reportDate + "_"+config.getId();
         try {
@@ -165,24 +166,24 @@ public class WebcamRecorder {
 		webcam.setViewSize(size);
 		webcam.open(true); 
                 int i= 0;
-                start = System.currentTimeMillis();
-                inicio = System.currentTimeMillis();
-                BufferedWriter bw2;
-                try {
-                    bw2 = new BufferedWriter(new FileWriter(frames));
-               
-		while(sw!=0) {
-                        
+                int init =0;
+                //ArrayList<Long> frames_n = new ArrayList();
+		while(sw!=0) {                        
 			BufferedImage image = ConverterFactory.convertToType(webcam.getImage(), BufferedImage.TYPE_3BYTE_BGR);
                         int type = image.getType() == 0? BufferedImage.TYPE_INT_ARGB : image.getType();
                         //if(size.width!=IMG_WIDTH && size.height !=IMG_HEIGHT){ image = resizeImage(image,type);}
                         image = ConverterFactory.convertToType(image, BufferedImage.TYPE_3BYTE_BGR);
-			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
                         time = System.currentTimeMillis();
+			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+                        if(init==0){
+                            inicio = time;
+                            start = time;
+                            init=1;
+                        }
 			IVideoPicture frame = converter.toPicture(image, (time-start) * 1000);
 			frame.setKeyFrame(i == 0);
 			frame.setQuality(0);
-                        bw2.write(time+"\n");
+                        //frames_n.add(time);
 			writer.encodeVideo(0, frame);
                         i++;
                         
@@ -228,11 +229,17 @@ public class WebcamRecorder {
                                 Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-		} 
-                bw2.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
+		}
+                /*BufferedWriter bw2;
+                try {
+                    bw2 = new BufferedWriter(new FileWriter(frames));
+                for(int j=0;j<frames_n.size();j++){                    
+                        bw2.write(frames_n.get(j)+"\n");
                 }
+                bw2.close();
+                } catch (IOException ex) {                
+                    Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
+                }*/
                 fin = time;
 		writer.close();
                 webcam.close();
@@ -252,14 +259,6 @@ public class WebcamRecorder {
                 }
             }
 	}
-        
-        private BufferedImage resizeImage(BufferedImage originalImage, int type){
-            BufferedImage resizedImage = new BufferedImage(IMG_WIDTH,IMG_HEIGHT,type);
-            Graphics2D g = resizedImage.createGraphics();
-            g.drawImage(originalImage,0,0,IMG_WIDTH,IMG_HEIGHT,null);
-            g.dispose();
-            return resizedImage;
-        }
         
         public void StartRecord(){            
                 Thread t=new Thread(new Record());
