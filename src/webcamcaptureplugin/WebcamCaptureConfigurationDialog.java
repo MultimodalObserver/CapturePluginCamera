@@ -9,7 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import mo.core.ui.GridBConstraints;
@@ -22,7 +25,9 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
     JTextField nameField;
     JButton accept;
     JComboBox cbCamera;
-    JComboBox cbFPS;
+    //JComboBox cbFPS;
+    JSpinner sFPS;
+    
     JComboBox cbDIM;
     public int id_camera;
     public int fps_option;
@@ -61,7 +66,7 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         JLabel label = new JLabel(dialogBundle.getString("configuration_n"));
         JLabel webcam = new JLabel("Device");
         JLabel fps = new JLabel("FPS:");
-        String[] frames = {"5","15","30","45","60"};
+        //String[] frames = {"5","15","30","45","60"};
         JLabel dim = new JLabel("Dimension");
         String[] dimensiones = {"176x144","320x240","640x480","800x600","1024x768","1280x720","1366x768","1920x1080"};
         String[ ] cameras = new String[wCam.size()];
@@ -71,11 +76,13 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         //discovery.stop se encarga de detener la busqueda de dispositivos, una vez se ha iniciado el layout
         discovery.stop();
         cbCamera = new JComboBox(cameras);
-        cbFPS = new JComboBox(frames);
+        //cbFPS = new JComboBox(frames);
         cbDIM = new JComboBox(dimensiones);
-        cbFPS.setSelectedIndex(4);
+        //cbFPS.setSelectedIndex(4);
         nameField = new JTextField();
         nameField.getDocument().addDocumentListener(this);
+        SpinnerModel model = new SpinnerNumberModel(5,5,45,1);
+        sFPS = new JSpinner(model);
 
         gbc.gx(0).gy(0).f(GridBConstraints.HORIZONTAL).a(GridBConstraints.FIRST_LINE_START).i(new Insets(5, 5, 5, 5));
         add(label, gbc);
@@ -83,7 +90,7 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
         add(webcam, gbc.gy(2).gx(0));
         add(cbCamera,gbc.gx(2).gy(2).wx(1).gw(3));
         add(fps,gbc.gx(0).gy(4));
-        add(cbFPS,gbc.gx(2).gy(4).wx(1).gw(3));
+        add(sFPS,gbc.gx(2).gy(4).wx(1).gw(3));
         add(dim,gbc.gx(0).gy(6));
         add(cbDIM,gbc.gx(2).gy(6).wx(1).gw(3));
               
@@ -99,7 +106,8 @@ public class WebcamCaptureConfigurationDialog extends JDialog implements Documen
             public void actionPerformed(ActionEvent e) {
                 accepted = true;
                 id_camera=cbCamera.getSelectedIndex();
-                fps_option=cbFPS.getSelectedIndex(); //0==15; 1 == 30; 2== 45; 3==60
+                //fps_option=cbFPS.getSelectedIndex(); //0==15; 1 == 30; 2== 45; 3==60
+                fps_option = (int) sFPS.getValue();
                 dim_option=cbDIM.getSelectedIndex(); 
                 setVisible(false);
                 dispose();

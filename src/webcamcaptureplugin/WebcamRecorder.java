@@ -53,7 +53,9 @@ public class WebcamRecorder {
     private static final Logger logger = Logger.getLogger(WebcamRecorder.class.getName());
     
     public int id_camera;
-    public int fps_op;
+    //public int fps_op;
+    public int sleep;
+    public long fps_aux;
     public int sw=1;
     public int IMG_WIDTH;
     public int IMG_HEIGHT;
@@ -64,7 +66,8 @@ public class WebcamRecorder {
         this.org = org;
         this.config = c;
         this.id_camera=ID;
-        this.fps_op=FPS;
+        //this.fps_op=FPS;
+        this.sleep = (int)(1000/FPS);
         createFile(stageFolder);
         switch(DIM){
             case 0:                
@@ -178,6 +181,7 @@ public class WebcamRecorder {
                         if(init==0){
                             inicio = time;
                             start = time;
+                            fps_aux = time+sleep;
                             init=1;
                         }
 			IVideoPicture frame = converter.toPicture(image, (time-start) * 1000);
@@ -186,8 +190,15 @@ public class WebcamRecorder {
                         //frames_n.add(time);
 			writer.encodeVideo(0, frame);
                         i++;
-                        
-                        switch(fps_op){
+                        while(fps_aux>System.currentTimeMillis()){
+                            try {
+                                Thread.sleep(1);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(WebcamRecorder.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        fps_aux=fps_aux+sleep;
+                        /*switch(fps_op){
                                 case 0:
                             {
                                 try {
@@ -221,7 +232,7 @@ public class WebcamRecorder {
                                 }
                             }
                                 case 4: 
-                            }
+                            }*/
                         while(sw==2){                           
                             try {       
                                 Thread.sleep(2);
